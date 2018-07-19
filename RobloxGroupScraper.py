@@ -7,9 +7,9 @@ from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 import time
 
-membersList = [[]]
+membersList = []
+membersLinkList = []
 running = True
-i = 1
 
 browser = webdriver.Chrome()
 browser.get("https://www.roblox.com/groups/group.aspx?gid=7013")
@@ -26,45 +26,64 @@ browser.find_element_by_id('GroupsPeople_Members').click()
 #todo: create an outer loop to scroll through each option on drop-down(start from here)
 
 select = Select(browser.find_element_by_id('ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlRolesetList'))
-#how to select from dropdown: ex) second option: select.select_by_index(1)
-select.select_by_index(1)
 
-time.sleep(2) #change this to wait until new appears such as wait for index to update? idk
+numRoles = len(select.options)
 
-updatePage()
+for countRoles in range(0,numRoles):
 
-if src.find("div",attrs={"class":"paging_pagenums_container"}):
-    pageNums = int(src.find("div",attrs={"class":"paging_pagenums_container"}).text) # add fix for no page nums(1 page, error is nontype)
-else:
-    pageNums = 1
+    select = Select(browser.find_element_by_id('ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlRolesetList'))
 
-while i <= pageNums:
-    #pageEnter = browser.find_element_by_id('ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlUsers_Footer')
-    #pageEnter.click()
-    #todo: find and update pagenums for each selection, same class and text just need to update(done)
-    print(pageNums)
-    if pageNums != 1:
-        WebDriverWait(browser, 3).until(EC.presence_of_element_located((By.ID, 'ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlUsers_Footer_ctl01_PageTextBox')))
-        pageEnter = browser.find_element_by_id('ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlUsers_Footer_ctl01_PageTextBox')
-        pageEnter.clear()
-        pageEnter.send_keys(str(i))
-        pageEnter.send_keys(Keys.RETURN)
-    #time.sleep(2)
-    temp = []
-    while len(temp) < 1:
-        updatePage()
-        temp = src.findAll("div",attrs={"class":"GroupMember"})
-        print (len(temp))
+    select.select_by_index(countRoles)
 
-    temp.clear()
+    time.sleep(2) #change this to wait until new appears such as wait for index to update? idk
 
-    membersClass = src.findAll("div",attrs={"class":"GroupMember"})
+    updatePage()
 
-    for member in membersClass:
-        membersList.append(member.text.strip())
+    if src.find("div",attrs={"class":"paging_pagenums_container"}):
+        pageNums = int(src.find("div",attrs={"class":"paging_pagenums_container"}).text) # add fix for no page nums(1 page, error is nontype)
+    else:
+        pageNums = 1
 
-    i = i + 1
+    for i in range(1,pageNums+1):
+        #pageEnter = browser.find_element_by_id('ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlUsers_Footer')
+        #pageEnter.click()
+        print(pageNums)
+        if pageNums != 1:
+            WebDriverWait(browser, 3).until(EC.presence_of_element_located((By.ID, 'ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlUsers_Footer_ctl01_PageTextBox')))
+            pageEnter = browser.find_element_by_id('ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlUsers_Footer_ctl01_PageTextBox')
+            pageEnter.clear()
+            pageEnter.send_keys(str(i))
+            pageEnter.send_keys(Keys.RETURN)
 
+        temp = []
+        while len(temp) < 1:
+            updatePage()
+            temp = src.findAll("div",attrs={"class":"GroupMember"})
+            print (len(temp))
+
+        temp.clear()
+
+        membersClass = src.findAll("div",attrs={"class":"GroupMember"})
+
+        for member in membersClass:
+            membersList.append(member.text.strip())
+
+        for member in membersClass:
+            membersLinkList.append(member.find('a').attrs['href']) #find href in a type
+
+browser.close()
+
+exportFile = open('exportMembers.txt', 'w')
+exportLinks = open('exportLinks.txt', 'w')
+
+for entity in membersList:
+    exportFile.write("%s\n" % entity)
+for entity in membersLinkList:
+    exportLinks.write("%s\n" % entity)
+
+exportFile.close()
 print(membersList)
+print(membersLinkList)
 print(len(membersList))
+print(len(membersLinkList))
     
