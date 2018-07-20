@@ -12,7 +12,7 @@ membersLinkList = []
 running = True
 
 browser = webdriver.Chrome()
-browser.get("https://www.roblox.com/groups/group.aspx?gid=7013")
+browser.get("https://www.roblox.com/groups/group.aspx?gid=4097667")
 
 def updatePage():
     global src
@@ -35,7 +35,8 @@ for countRoles in range(0,numRoles):
 
     select.select_by_index(countRoles)
 
-    time.sleep(2) #change this to wait until new appears such as wait for index to update? idk
+    #time.sleep(2) #change this to wait until new appears such as wait for index to update? idk
+    WebDriverWait(browser, 3).until(EC.presence_of_element_located((By.ID, 'ctl00_cphRoblox_rbxGroupRoleSetMembersPane_dlUsers_ctrl0_hlAvatar')))
 
     updatePage()
 
